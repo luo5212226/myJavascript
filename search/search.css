@@ -1,0 +1,104 @@
+.search{
+ box-shadow: 1px 1px 5px #888888;
+ display: flex;
+ flex-direction:row;
+ align-items:center;
+ justify-content:center;
+ width: 370px; 
+ position: fixed;
+ right: 40px;
+ top: 40px;
+ border: 1px solid rgb(172, 172, 172);
+ border-radius: 4px;
+ height: 40px;
+ background-color: white;
+}
+.search .input{
+ border: none;
+ height: 30px;
+ outline: none;
+}
+.search .span{
+ width: 15px;
+ height: 20px;
+ font-size: 12px;
+ color:grey;
+ text-align: center;
+}
+.search .button1{
+ border-radius: 3px;
+ position: relative;
+ background:url(image1/select.png) no-repeat center 50%;
+ background-size: 45% 45%;
+ width:30px; 
+ outline:none;
+ height:30px; 
+ border:0;
+}
+.search .button2{
+ border-radius: 3px;
+ position: relative;
+ background:url(image1/next.png) no-repeat center 50%;
+ background-size: 60% 60%;
+ width:30px; 
+ height:30px; 
+ outline:none;
+ border:0;
+}
+.search .button3{
+ border-radius: 3px;
+ position: relative;
+ background:url(image1/last.png) no-repeat center 50%;
+ background-size: 60% 60%;
+ width:30px; 
+ height:30px; 
+ outline:none;
+ border:0;
+}
+.search .button4{
+ border-radius: 3px;
+ position: relative;
+ background:url(image1/menu.png) no-repeat center 50%;
+ background-size: 50% 50%;
+ width:30px; 
+ height:30px; 
+ outline:none;
+ border:0;
+}
+.button1:active{
+ top: 2px; /**向下偏移2px **/
+}
+.button2:active{
+ top: 2px;
+}
+.button3:active{
+ top: 2px;
+}
+.button4:active{
+ top: 2px;
+}
+.button1:hover{
+ background-color: rgb(220, 220, 220);
+ transition: all 0.3s linear;
+}
+.button2:hover{
+ background-color: rgb(220, 220, 220);
+ transition: all 0.3s linear;
+}
+.button3:hover{
+ background-color: rgb(220, 220, 220);
+ transition: all 0.3s linear;
+}
+.button4:hover{
+ background-color: rgb(220, 220, 220);
+ transition: all 0.3s linear;
+}
+.line1{
+ width: 1px;
+ height: 20px; 
+ background-color:lightgrey; 
+ margin: 10px
+}
+.highlight {
+ background-color:yellow;
+}
