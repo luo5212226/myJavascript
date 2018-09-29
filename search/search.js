@@ -97,7 +97,8 @@
           init(options.clickFn[$(this).attr('number')]); // $(this)是当前添加事件的元素
         });
       }
-      keyPress();
+      // input回车事件
+      keyPress(options.inputId, options.clickFn[0]);
     }());
     /**
     * 获取指定字符
@@ -107,7 +108,7 @@
     */
     function select (body, search, now) {
       // 刷新页面
-      refresh();
+      clear();
       // 记录当前显示字符的index
       now.index = 0;
       // 需要查询的字符
@@ -189,7 +190,7 @@
     // 重置
     function reset () {
       // 刷新页面
-      refresh();
+      clear();
       $('#my_input').val('');
       if (options.flag == true) {
         clickOff();
@@ -200,7 +201,7 @@
     // 关闭搜索框
     function clickOff () {
       options.flag = false;
-      displaySwitch('none');
+      displaySwitch(options.searchId, 'none');
       $('#my_button4').css('display', 'block');
       $('#my_search').animate({
         width: '30px'
@@ -213,7 +214,7 @@
       for (var i = 0; i < options.spanId.length; i++) {
         $('#' + options.spanId[i]).html('');
       }
-      displaySwitch('block');
+      displaySwitch(options.searchId, 'block');
       $('#my_search').animate({
         width: '370px'
       }, 200);
@@ -288,7 +289,7 @@
       }
     };
     // 刷新
-    function refresh () {
+    function clear () {
       var pNode = '';
       var len = $('.highlight').length;
       if (len > 0) {
@@ -306,7 +307,7 @@
     };
     /**
     * 按钮是否可用
-    * @param status 函数状态
+    * @param b true or false
     */
     function btnDisabled (b) {
       $('#my_button2').attr('disabled', b);
@@ -314,18 +315,23 @@
     };
     /**
     * 插件元素是否可见
-    * @param status 函数状态
+    * @param id 不可见元素id
+    * @param a display属性值
     */
-    function displaySwitch (a) {
-      document.getElementById('my_search').childNodes.forEach(function (item) {
+    function displaySwitch (id, a) {
+      document.getElementById(id).childNodes.forEach(function (item) {
         item.style.display = a;
       });
     };
-    // 添加input回车事件
-    function keyPress () {
-      $('#my_input').bind('keypress', function (event) {
+    /**
+    * 添加input回车事件
+    * @param id 回车事件绑定id
+    * @param status 按钮功能
+    */
+    function keyPress (id, status) {
+      $(id).bind('keypress', function (event) {
         if (event.keyCode == 13) {
-          init('select');
+          init(status);
         }
       });
     }
