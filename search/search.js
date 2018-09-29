@@ -90,6 +90,7 @@
       });
       $('body').prepend(_div); */
       $('body').prepend($('<div mystatus="1" id="my_search" class="search" style="width: 30px;"><input id="my_input" mystatus="1" class="input" style="display: none;"></input><span id="my_span1" mystatus="1" class="span" style="display: none;"></span><span id="my_span2" mystatus="1" class="span" style="display: none;"></span><span id="my_span3" mystatus="1" class="span" style="display: none;"></span><div mystatus="1" id="my_line" class="line1" style="display: none;"></div><button id="my_button1" title="查找" class="button1" style="display: none;"></button><button id="my_button2" title="下一个" class="button2" style="display: none;"></button><button id="my_button3" title="上一个" class="button3" style="display: none;"></button><button id="my_button4" title="关闭" class="button4""></button></div>'));
+      // 添加点击事件
       for (var j = 0; j < options.buttonId.length; j++) {
         document.getElementById(options.buttonId[j]).setAttribute('number', j);
         document.getElementById(options.buttonId[j]).addEventListener('click', function () {
@@ -302,10 +303,18 @@
         }
       }
     };
+    /**
+    * 按钮是否可用
+    * @param status 函数状态
+    */
     function btnDisabled (b) {
       $('#my_button2').attr('disabled', b);
       $('#my_button3').attr('disabled', b);
     };
+    /**
+    * 插件元素是否可见
+    * @param status 函数状态
+    */
     function displaySwitch (a) {
       document.getElementById('my_search').childNodes.forEach(function (item) {
         item.style.display = a;
