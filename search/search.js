@@ -97,6 +97,7 @@
           init(options.clickFn[$(this).attr('number')]); // $(this)是当前添加事件的元素
         });
       }
+      keyPress();
     }());
     /**
     * 获取指定字符
@@ -320,6 +321,14 @@
         item.style.display = a;
       });
     };
+    // 添加input回车事件
+    function keyPress () {
+      $('#my_input').bind('keypress', function (event) {
+        if (event.keyCode == 13) {
+          init('select');
+        }
+      });
+    }
     // 链式传递，返回当前对象
     return $(this);
   };
