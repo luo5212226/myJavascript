@@ -329,7 +329,7 @@
     * @param status 按钮功能
     */
     function keyPress (id, status) {
-      $(id).bind('keypress', function (event) {
+      $('#' + id).bind('keypress', function (event) {
         if (event.keyCode == 13) {
           init(status);
         }
