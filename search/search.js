@@ -138,6 +138,13 @@
       var node = iterator.nextNode();
       // 遍历dom树
       if (value) {
+        // 未转义前的搜索值
+        var value1 = value;
+        // 需要转义的字符
+        var str = ['\\', '*', '+', '|', '{', '}', '(', ')', '^', '$', '[', ']', '?', ',', '.', '&'];
+        for (var i = 0; i < str.length; i++) {
+          value = value.replace(str[i], '\\' + str[i]);
+        }
         var reg = new RegExp(value, 'gim');
         while (node) {
           // 输入值是否为空
@@ -153,7 +160,7 @@
       for (var i = 0; i < temp.length; i++) {
         var html1 = temp[i].nodeValue;
         // 如果不包含该字符串，跳出当前循环
-        if (html1.toLowerCase().indexOf(value.toLowerCase()) == -1) {
+        if (html1.toLowerCase().indexOf(value1.toLowerCase()) == -1) {
           continue;
         } else {
           var newHtml = html1.replace(reg, '<span class="highlight">$&</span>');
