@@ -23,6 +23,7 @@
       buttonClass: ['button1', 'button2', 'button3', 'button4'],
       title: ['查找', '下一个', '上一个', '关闭'],
       clickFn: ['select', 'next', 'last', 'reset'],
+      // 当前元素高亮
       now: {
         index: 0
       },
@@ -36,59 +37,6 @@
     var options = $.extend(setOption, options);
     // 初始化插件
     (function () {
-      /* var _div = document.createElement('div');
-      _div.setAttribute('mystatus', options.myStatus);
-      _div.id = options.searchId;
-      _div.className = options.searchClass;
-
-      var _input = document.createElement('input');
-      _input.style.display = 'none';
-      _input.id = options.inputId;
-      _input.setAttribute('mystatus', options.myStatus);
-      _div.appendChild(_input);
-      _input.className = options.inputClass;
-
-      var _span = [], _button = [];
-      for (var i = 0; i < options.spanId.length; i++) {
-        _span.push(document.createElement('span'));
-        _span[i].id = options.spanId[i];
-        _span[i].setAttribute('mystatus', options.myStatus);
-        _span[i].className = options.spanClass;
-        _span[i].style.display = 'none';
-        _div.appendChild(_span[i]);
-      }
-
-      var _line = document.createElement('div');
-      _line.style.display = 'none';
-      _line.setAttribute('mystatus', options.myStatus);
-      _line.id = options.lineId;
-      _div.appendChild(_line);
-      _line.className = options.lineClass;
-
-      for (var j = 0; j < options.buttonId.length; j++) {
-        _button.push(document.createElement('button'));
-        if (j < 3) {
-          _button[j].style.display = 'none';
-        }
-        _button[j].setAttribute('number', j);
-        _button[j].id = options.buttonId[j];
-        _button[j].title = options.title[j];
-        _button[j].className = options.buttonClass[j];
-        _div.appendChild(_button[j]);
-      }
-      _button[0].addEventListener('click', function () {
-        init(options.clickFn[0]);
-      });
-      _button[1].addEventListener('click', function () {
-        init(options.clickFn[1]);
-      });
-      _button[2].addEventListener('click', function () {
-        init(options.clickFn[2]);
-      });
-      _button[3].addEventListener('click', function () {
-        init(options.clickFn[3]);
-      });
-      $('body').prepend(_div); */
       $('body').prepend($('<div mystatus="1" id="my_search" class="search" style="width: 30px;"><input id="my_input" mystatus="1" class="input" style="display: none;"></input><span id="my_span1" mystatus="1" class="span" style="display: none;"></span><span id="my_span2" mystatus="1" class="span" style="display: none;"></span><span id="my_span3" mystatus="1" class="span" style="display: none;"></span><div mystatus="1" id="my_line" class="line1" style="display: none;"></div><button id="my_button1" title="查找" class="button1" style="display: none;"></button><button id="my_button2" title="下一个" class="button2" style="display: none;"></button><button id="my_button3" title="上一个" class="button3" style="display: none;"></button><button id="my_button4" title="关闭" class="button4""></button></div>'));
       // 添加点击事件
       for (var j = 0; j < options.buttonId.length; j++) {
@@ -117,12 +65,14 @@
       var temp = [];
       // 过滤遍历结果
       var filter = function (node) {
-        // 插件元素
+        // 过滤插件元素
         if (node.parentNode.attributes.mystatus) {
           return NodeFilter.FILTER_REJECT;
-        } else if (node.parentNode.nodeName.toLowerCase() == 'script') { // script元素
+        } else if (node.parentNode.nodeName.toLowerCase() == 'script') { // 过滤script元素
           return NodeFilter.FILTER_REJECT;
-        } else if (node.nodeValue.replace(/[\r\n]/gm, '').replace(/[ ]/g, '') == '') { // 换行或者空元素
+        } else if (node.nodeValue.replace(/[\r\n]/gm, '').replace(/[ ]/g, '') == '') { // 过滤换行或者空元素
+          return NodeFilter.FILTER_REJECT;
+        } else if (node.parentNode.nodeName.toLowerCase() == 'style') { // 过滤style元素
           return NodeFilter.FILTER_REJECT;
         } else {
           return NodeFilter.FILTER_ACCEPT;
@@ -232,17 +182,7 @@
     */
     function next (now) {
       // 高亮index小于总元素个数
-      if (now.index < $('.highlight').size() - 1) {
-        $('.highlight')[now.index].style.backgroundColor = options.otherColor;
-        now.index++;
-        $('#my_span1').html(now.index + 1);
-        $('.highlight')[now.index].style.backgroundColor = options.nowColor;
-      } else {
-        $('.highlight')[now.index].style.backgroundColor = options.otherColor;
-        now.index = 0;
-        $('#my_span1').html(now.index + 1);
-        $('.highlight')[now.index].style.backgroundColor = options.nowColor;
-      }
+      indexChange(now, $('.highlight').size() - 1, now.index + 1, 0);
       move(now);
     };
     /**
@@ -251,18 +191,28 @@
     */
     function last (now) {
       // 高亮index小于1
-      if (now.index < 1) {
+      indexChange(now, 1, $('.highlight').size() - 1, now.index - 1);
+      move(now);
+    };
+    /**
+    * 改变当前高亮
+    * @param now 当前位置
+    * @param count 高亮元素的最大最小临界值
+    * @param size 当前高亮位置改变
+    * @param index 当前高亮位置改变
+    */
+    function indexChange (now, count, size, index) {
+      if (now.index < count) {
         $('.highlight')[now.index].style.backgroundColor = options.otherColor;
-        now.index = $('.highlight').size() - 1;
+        now.index = size;
         $('#my_span1').html(now.index + 1);
         $('.highlight')[now.index].style.backgroundColor = options.nowColor;
       } else {
         $('.highlight')[now.index].style.backgroundColor = options.otherColor;
-        now.index--;
+        now.index = index;
         $('#my_span1').html(now.index + 1);
         $('.highlight')[now.index].style.backgroundColor = options.nowColor;
       }
-      move(now);
     };
     /**
     * 窗口移动到当前高亮元素
