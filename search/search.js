@@ -42,6 +42,8 @@
       },
       // 插件是否打开
       flag: false,
+      // 一次性存放一个页面的文本节点
+      textNode: [],
       // 高亮颜色
       otherColor: 'yellow',
       nowColor: 'lightsalmon'
@@ -49,18 +51,7 @@
     // 加载数据
     var options = $.extend(setOption, options);
     // 初始化插件
-    (function () {
-      $('body').prepend($('<div mystatus="1" id="MY_SEARCH" class="search" style="width: 30px;"><input id="MY_INPUT" mystatus="1" class="input" style="display: none;"></input><span id="LAST_INDEX_SPAN" mystatus="1" class="span" style="display: none;"></span><span id="LINE_SPAN" mystatus="1" class="span" style="display: none;"></span><span id="NEXT_INDEX_SPAN" mystatus="1" class="span" style="display: none;"></span><div mystatus="1" id="MY_LINE" class="line1" style="display: none;"></div><button id="SEARCH_BUTTON" title="查找" class="button1" style="display: none;"></button><button id="NEXT_BUTTON" title="下一个" class="button2" style="display: none;"></button><button id="LAST_BUTTON" title="上一个" class="button3" style="display: none;"></button><button id="RESET_BUTTON" title="关闭" class="button4""></button></div>'));
-      // 添加点击事件
-      for (var j = 0; j < options.buttonId.length; j++) {
-        document.getElementById(options.buttonId[j]).setAttribute('number', j);
-        document.getElementById(options.buttonId[j]).addEventListener('click', function () {
-          init(options.clickFn[$(this).attr('number')]); // $(this)是当前添加事件的元素
-        });
-      }
-      // input回车事件
-      keyPress(options.inputId, options.clickFn[0]);
-    }());
+    initElement();
     /**
     * 获取指定字符
     * @param body document.body
@@ -74,54 +65,20 @@
       now.index = 0;
       // 需要查询的字符
       var value = search.value.trim();
-      // 存放text元素
-      var temp = [];
-      // 过滤遍历结果
-      var filter = function (node) {
-        // 过滤插件元素
-        if (node.parentNode.attributes.mystatus) {
-          return NodeFilter.FILTER_REJECT;
-        } else if (node.parentNode.nodeName.toLowerCase() == 'script') { // 过滤script元素
-          return NodeFilter.FILTER_REJECT;
-        } else if (node.nodeValue.replace(/[\r\n]/gm, '').replace(/[ ]/g, '') == '') { // 过滤换行或者空元素
-          return NodeFilter.FILTER_REJECT;
-        } else if (node.parentNode.nodeName.toLowerCase() == 'style') { // 过滤style元素
-          return NodeFilter.FILTER_REJECT;
-        } else {
-          return NodeFilter.FILTER_ACCEPT;
-        }
-      };
-      /** 用NodeIterator进行遍历dom树
-       * @param body 查找范围
-       * @param NodeFilter.SHOW_TEXT 定义只显示文本
-       * @param filter 是否进行过滤
-       * @param false 默认false
-       */
-      var iterator = document.createNodeIterator(body, NodeFilter.SHOW_TEXT, filter, false);
-      var node = iterator.nextNode();
-      // 遍历dom树
-      if (value) {
-        // 未转义前的搜索值
-        var value1 = value;
-        // 需要转义的字符
-        var str = ['\\', '*', '+', '|', '{', '}', '(', ')', '^', '$', '[', ']', '?', ',', '.', '&'];
-        for (var i = 0; i < str.length; i++) {
-          value = value.replace(str[i], '\\' + str[i]);
-        }
-        var reg = new RegExp(value, 'gim');
-        while (node) {
-          // 输入值是否为空
-          var html = node.nodeValue;
-          // text元素的值不为空则存入数组
-          if (html.trim()) {
-            temp.push(node);
-          }
-          node = iterator.nextNode();
-        }
+      // 未转义前的搜索值
+      var value1 = value;
+      // 需要转义的字符
+      var str = ['\\', '*', '+', '|', '{', '}', '(', ')', '^', '$', '[', ']', '?', ',', '.', '&'];
+      for (var i = 0; i < str.length; i++) {
+        value = value.replace(str[i], '\\' + str[i]);
       }
+      // 正则全局匹配转义后的字符
+      var reg = new RegExp(value, 'gim');
+      // 存放text元素
+      options.textNode = eachDom(body, value);
       // 循环替换text元素的值
-      for (var i = 0; i < temp.length; i++) {
-        var html1 = temp[i].nodeValue;
+      for (var i = 0; i < options.textNode.length; i++) {
+        var html1 = options.textNode[i].nodeValue;
         // 如果不包含该字符串，跳出当前循环
         if (html1.toLowerCase().indexOf(value1.toLowerCase()) == -1) {
           continue;
@@ -131,15 +88,15 @@
           var newNode = document.createElement('span');
           newNode.setAttribute('replaceTag', options.replaceTag);
           newNode.innerHTML = newHtml;
-          var pHtml = temp[i].parentNode.innerHTML;
+          var pHtml = options.textNode[i].parentNode.innerHTML;
           // 如果有兄弟节点，则用span替换当前textnode，直接替换innerHtml会把其他节点删除
-          if (temp[i].nextSibling || temp[i].previousSibling) {
-            temp[i].parentNode.replaceChild(newNode, temp[i]);
-            // temp[i].parentNode.insertBefore(newNode, temp[i].nextSibling);
-            // temp[i].parentNode.removeChild(temp[i]);
+          if (options.textNode[i].nextSibling || options.textNode[i].previousSibling) {
+            options.textNode[i].parentNode.replaceChild(newNode, options.textNode[i]);
+            // options.textNode[i].parentNode.insertBefore(newNode, options.textNode[i].nextSibling);
+            // options.textNode[i].parentNode.removeChild(options.textNode[i]);
           } else {
             // 无兄弟节点直接替换HTML内容
-            temp[i].parentNode.innerHTML = pHtml.replace(html1, newHtml);
+            options.textNode[i].parentNode.innerHTML = pHtml.replace(html1, newHtml);
           }
         }
       }
@@ -157,7 +114,10 @@
         $('#' + options.spanId[0]).text(0);
       }
     };
-    // 重置
+    /**
+    * 重置
+    * @param now 当前元素高亮index及高亮Class
+    */
     function reset (now) {
       // 刷新页面
       clear(now);
@@ -304,7 +264,65 @@
           init(status);
         }
       });
-    }
+    };
+    // 初始化插件
+    function initElement () {
+      $('body').prepend($('<div mystatus="1" id="MY_SEARCH" class="search" style="width: 30px;"><input id="MY_INPUT" mystatus="1" class="input" style="display: none;"></input><span id="LAST_INDEX_SPAN" mystatus="1" class="span" style="display: none;"></span><span id="LINE_SPAN" mystatus="1" class="span" style="display: none;"></span><span id="NEXT_INDEX_SPAN" mystatus="1" class="span" style="display: none;"></span><div mystatus="1" id="MY_LINE" class="line1" style="display: none;"></div><button id="SEARCH_BUTTON" title="查找" class="button1" style="display: none;"></button><button id="NEXT_BUTTON" title="下一个" class="button2" style="display: none;"></button><button id="LAST_BUTTON" title="上一个" class="button3" style="display: none;"></button><button id="RESET_BUTTON" title="关闭" class="button4""></button></div>'));
+      // 添加点击事件
+      for (var j = 0; j < options.buttonId.length; j++) {
+        document.getElementById(options.buttonId[j]).setAttribute('number', j);
+        document.getElementById(options.buttonId[j]).addEventListener('click', function () {
+          init(options.clickFn[$(this).attr('number')]); // $(this)是当前添加事件的元素
+        });
+      }
+      // input回车事件
+      keyPress(options.inputId, options.clickFn[0]);
+    };
+    /**
+    * 遍历dom树，找出文本节点
+    * @param body document.body
+    * @param value 搜索的目标值
+    */
+    function eachDom (body, value) {
+      // 存放text元素
+      var temp = [];
+      // 过滤遍历结果
+      var filter = function (node) {
+        // 过滤插件元素
+        if (node.parentNode.attributes.mystatus) {
+          return NodeFilter.FILTER_REJECT;
+        } else if (node.parentNode.nodeName.toLowerCase() == 'script') { // 过滤script元素
+          return NodeFilter.FILTER_REJECT;
+        } else if (node.nodeValue.replace(/[\r\n]/gm, '').replace(/[ ]/g, '') == '') { // 过滤换行或者空元素
+          return NodeFilter.FILTER_REJECT;
+        } else if (node.parentNode.nodeName.toLowerCase() == 'style') { // 过滤style元素
+          return NodeFilter.FILTER_REJECT;
+        } else {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      };
+      /** 用NodeIterator进行遍历dom树
+       * @param body 查找范围
+       * @param NodeFilter.SHOW_TEXT 定义只显示文本
+       * @param filter 是否进行过滤
+       * @param false 默认false
+       */
+      var iterator = document.createNodeIterator(body, NodeFilter.SHOW_TEXT, filter, false);
+      var node = iterator.nextNode();
+      // 遍历dom树
+      if (value) {
+        while (node) {
+          // 输入值是否为空
+          var html = node.nodeValue;
+          // text元素的值不为空则存入数组
+          if (html.trim()) {
+            temp.push(node);
+          }
+          node = iterator.nextNode();
+        }
+      }
+      return temp;
+    };
     // 链式传递，返回当前对象
     return $(this);
   };
