@@ -11,21 +11,34 @@
       myStatus: '1',
       // 标志替换的span标签
       replaceTag: '1',
-      searchId: 'my_search',
+      // 搜索框ID
+      searchId: 'MY_SEARCH',
+      // 搜索框Class
       searchClass: 'search',
-      inputId: 'my_input',
+      // 输入框ID
+      inputId: 'MY_INPUT',
+      // 输入框Class
       inputClass: 'input',
-      spanId: ['my_span1', 'my_span2', 'my_span3'],
+      // 记录高亮个数span标签ID
+      spanId: ['LAST_INDEX_SPAN', 'LINE_SPAN', 'NEXT_INDEX_SPAN'],
+      // 记录高亮个数span标签的Class
       spanClass: 'span',
-      lineId: 'my_line',
+      // 分割线ID
+      lineId: 'MY_LINE',
+      // 分割线Class
       lineClass: 'line1',
-      buttonId: ['my_button1', 'my_button2', 'my_button3', 'my_button4'],
+      // 操作按钮ID
+      buttonId: ['SEARCH_BUTTON', 'NEXT_BUTTON', 'LAST_BUTTON', 'RESET_BUTTON'],
+      // 操作按钮Class
       buttonClass: ['button1', 'button2', 'button3', 'button4'],
-      title: ['查找', '下一个', '上一个', '关闭'],
-      clickFn: ['select', 'next', 'last', 'reset'],
-      // 当前元素高亮
+      // 操作按钮title
+      title: ['查找', '下一个', '上一个', '重置'],
+      // 函数调用区分参数
+      clickFn: ['search', 'next', 'last', 'reset'],
+      // 当前元素高亮index及高亮Class
       now: {
-        index: 0
+        index: 0,
+        lightClass: 'highlight'
       },
       // 插件是否打开
       flag: false,
@@ -37,7 +50,7 @@
     var options = $.extend(setOption, options);
     // 初始化插件
     (function () {
-      $('body').prepend($('<div mystatus="1" id="my_search" class="search" style="width: 30px;"><input id="my_input" mystatus="1" class="input" style="display: none;"></input><span id="my_span1" mystatus="1" class="span" style="display: none;"></span><span id="my_span2" mystatus="1" class="span" style="display: none;"></span><span id="my_span3" mystatus="1" class="span" style="display: none;"></span><div mystatus="1" id="my_line" class="line1" style="display: none;"></div><button id="my_button1" title="查找" class="button1" style="display: none;"></button><button id="my_button2" title="下一个" class="button2" style="display: none;"></button><button id="my_button3" title="上一个" class="button3" style="display: none;"></button><button id="my_button4" title="关闭" class="button4""></button></div>'));
+      $('body').prepend($('<div mystatus="1" id="MY_SEARCH" class="search" style="width: 30px;"><input id="MY_INPUT" mystatus="1" class="input" style="display: none;"></input><span id="LAST_INDEX_SPAN" mystatus="1" class="span" style="display: none;"></span><span id="LINE_SPAN" mystatus="1" class="span" style="display: none;"></span><span id="NEXT_INDEX_SPAN" mystatus="1" class="span" style="display: none;"></span><div mystatus="1" id="MY_LINE" class="line1" style="display: none;"></div><button id="SEARCH_BUTTON" title="查找" class="button1" style="display: none;"></button><button id="NEXT_BUTTON" title="下一个" class="button2" style="display: none;"></button><button id="LAST_BUTTON" title="上一个" class="button3" style="display: none;"></button><button id="RESET_BUTTON" title="关闭" class="button4""></button></div>'));
       // 添加点击事件
       for (var j = 0; j < options.buttonId.length; j++) {
         document.getElementById(options.buttonId[j]).setAttribute('number', j);
@@ -54,9 +67,9 @@
     * @param search 输入框的值
     * @param now 当前位置
     */
-    function select (body, search, now) {
+    function search (body, search, now) {
       // 刷新页面
-      clear();
+      clear(now);
       // 记录当前显示字符的index
       now.index = 0;
       // 需要查询的字符
@@ -131,24 +144,24 @@
         }
       }
       // 通过高亮读取查询信息
-      if ($('.highlight').size() > 0) {
-        $('#my_span3').html($('.highlight').size());
-        $('#my_span2').html('/');
-        $('#my_span1').html(now.index + 1);
-        $('.highlight')[now.index].style.backgroundColor = options.nowColor;
+      if ($('.' + now.lightClass).size() > 0) {
+        $('#' + options.spanId[2]).text($('.' + now.lightClass).size());
+        $('#' + options.spanId[1]).text('/');
+        $('#' + options.spanId[0]).text(now.index + 1);
+        $('.' + now.lightClass)[now.index].style.backgroundColor = options.nowColor;
         move(now);
         btnDisabled(false);
       } else {
-        $('#my_span1').html(0);
-        $('#my_span2').html('/');
-        $('#my_span3').html(0);
+        $('#' + options.spanId[2]).text(0);
+        $('#' + options.spanId[1]).text('/');
+        $('#' + options.spanId[0]).text(0);
       }
     };
     // 重置
-    function reset () {
+    function reset (now) {
       // 刷新页面
-      clear();
-      $('#my_input').val('');
+      clear(now);
+      $('#' + options.inputId).val('');
       if (options.flag == true) {
         clickOff();
       } else {
@@ -159,8 +172,8 @@
     function clickOff () {
       options.flag = false;
       displaySwitch(options.searchId, 'none');
-      $('#my_button4').css('display', 'block');
-      $('#my_search').animate({
+      $('#' + options.buttonId[3]).css('display', 'block');
+      $('#' + options.searchId).animate({
         width: '30px'
       }, 200);
     };
@@ -169,10 +182,10 @@
       options.flag = true;
       btnDisabled(true);
       for (var i = 0; i < options.spanId.length; i++) {
-        $('#' + options.spanId[i]).html('');
+        $('#' + options.spanId[i]).text('');
       }
       displaySwitch(options.searchId, 'block');
-      $('#my_search').animate({
+      $('#' + options.searchId).animate({
         width: '370px'
       }, 200);
     };
@@ -182,7 +195,7 @@
     */
     function next (now) {
       // 高亮index小于总元素个数
-      indexChange(now, $('.highlight').size() - 1, now.index + 1, 0);
+      indexChange(now, $('.' + now.lightClass).size() - 1, now.index + 1, 0);
       move(now);
     };
     /**
@@ -191,7 +204,7 @@
     */
     function last (now) {
       // 高亮index小于1
-      indexChange(now, 1, $('.highlight').size() - 1, now.index - 1);
+      indexChange(now, 1, $('.' + now.lightClass).size() - 1, now.index - 1);
       move(now);
     };
     /**
@@ -203,15 +216,15 @@
     */
     function indexChange (now, count, size, index) {
       if (now.index < count) {
-        $('.highlight')[now.index].style.backgroundColor = options.otherColor;
+        $('.' + now.lightClass)[now.index].style.backgroundColor = options.otherColor;
         now.index = size;
-        $('#my_span1').html(now.index + 1);
-        $('.highlight')[now.index].style.backgroundColor = options.nowColor;
+        $('#' + options.spanId[0]).text(now.index + 1);
+        $('.' + now.lightClass)[now.index].style.backgroundColor = options.nowColor;
       } else {
-        $('.highlight')[now.index].style.backgroundColor = options.otherColor;
+        $('.' + now.lightClass)[now.index].style.backgroundColor = options.otherColor;
         now.index = index;
-        $('#my_span1').html(now.index + 1);
-        $('.highlight')[now.index].style.backgroundColor = options.nowColor;
+        $('#' + options.spanId[0]).text(now.index + 1);
+        $('.' + now.lightClass)[now.index].style.backgroundColor = options.nowColor;
       }
     };
     /**
@@ -219,7 +232,7 @@
     * @param now 当前位置
     */
     function move (now) {
-      var move = $('.highlight')[now.index].offsetTop;
+      var move = $('.' + now.lightClass)[now.index].offsetTop;
       $('html,body').animate({
         'scrollTop': move
       }, 200);
@@ -230,12 +243,12 @@
     */
     function init (status) {
       var body = document.body;
-      var search = document.getElementById('my_input');
-      if (status == 'select') {
-        select(body, search, options.now);
+      var searchValue = document.getElementById(options.inputId);
+      if (status == 'search') {
+        search(body, searchValue, options.now);
         return;
       } else if (status == 'reset') {
-        reset(body, search);
+        reset(options.now);
         return;
       } else if (status == 'next') {
         next(options.now);
@@ -246,18 +259,18 @@
       }
     };
     // 刷新
-    function clear () {
+    function clear (now) {
       var pNode = '';
-      var len = $('.highlight').length;
+      var len = $('.' + now.lightClass).length;
       if (len > 0) {
         for (var i = 0; i < len; i++) {
           // 父元素是否为替换的span标签
-          if ($('.highlight')[0].parentElement.attributes.replaceTag) {
-            $('.highlight')[0].parentElement.outerHTML = $('.highlight')[0].parentElement.innerHTML;
+          if ($('.' + now.lightClass)[0].parentElement.attributes.replaceTag) {
+            $('.' + now.lightClass)[0].parentElement.outerHTML = $('.' + now.lightClass)[0].parentElement.innerHTML;
           }
-          var pNode = $('.highlight')[0].parentNode;
-          var outHtml = $('.highlight')[0].outerHTML;
-          var text = $('.highlight')[0].innerText;
+          var pNode = $('.' + now.lightClass)[0].parentNode;
+          var outHtml = $('.' + now.lightClass)[0].outerHTML;
+          var text = $('.' + now.lightClass)[0].innerText;
           pNode.innerHTML = pNode.innerHTML.replace(outHtml, text);
         }
       }
@@ -267,8 +280,8 @@
     * @param b true or false
     */
     function btnDisabled (b) {
-      $('#my_button2').attr('disabled', b);
-      $('#my_button3').attr('disabled', b);
+      $('#' + options.buttonId[1]).attr('disabled', b);
+      $('#' + options.buttonId[2]).attr('disabled', b);
     };
     /**
     * 插件元素是否可见
