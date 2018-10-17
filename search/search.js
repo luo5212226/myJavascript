@@ -132,7 +132,8 @@
     function clickOff () {
       options.flag = false;
       displaySwitch(options.searchId, 'none');
-      $('#' + options.buttonId[3]).css('display', 'block');
+      $('#' + options.buttonId[3]).show();
+      // $('#' + options.buttonId[3]).css('display', 'block');
       $('#' + options.searchId).animate({
         width: '30px'
       }, 200);
@@ -206,16 +207,12 @@
       var searchValue = document.getElementById(options.inputId);
       if (status == 'search') {
         search(body, searchValue, options.now);
-        return;
       } else if (status == 'reset') {
         reset(options.now);
-        return;
       } else if (status == 'next') {
         next(options.now);
-        return;
       } else if (status == 'last') {
         last(options.now);
-        return;
       }
     };
     // 刷新
